@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export default function Sidebar({ user }) {
+// Accept isOpen prop and an onClose function for mobile usage (optional but good practice)
+export default function Sidebar({ user, isOpen, onClose }) {
   const pathname = usePathname();
 
   const nav = [
@@ -15,7 +16,14 @@ export default function Sidebar({ user }) {
   ];
 
   return (
-    <aside className="w-64 bg-white dark:bg-gray-800 border-r dark:border-gray-700 p-6 hidden md:block">
+    // Updated classes:
+    // - Always render with specific mobile styles applied when isOpen is true.
+    // - Use fixed positioning for mobile overlay.
+    <aside
+      className={`fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-800 border-r dark:border-gray-700 p-6 z-30 transform transition-transform duration-300 ease-in-out 
+        ${isOpen ? "translate-x-0" : "-translate-x-full"} 
+        md:translate-x-0 md:static md:h-auto md:block md:w-64`}
+    >
       <div className="mb-8">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white">
           ISP Admin
@@ -30,6 +38,8 @@ export default function Sidebar({ user }) {
           <Link
             key={n.href}
             href={n.href}
+            // Add onClick to close the sidebar automatically after clicking a link on mobile
+            onClick={onClose}
             className={`block px-3 py-2 rounded ${
               pathname === n.href
                 ? "bg-gray-100 dark:bg-gray-700"

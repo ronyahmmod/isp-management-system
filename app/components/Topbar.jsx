@@ -2,11 +2,17 @@
 "use client";
 import { signOut } from "next-auth/react";
 
-export default function Topbar({ user }) {
+// Accept the onMenuClick handler prop
+export default function Topbar({ user, onMenuClick }) {
   return (
     <header className="flex items-center justify-between p-4 border-b bg-white dark:bg-gray-800 dark:border-gray-700">
       <div className="flex items-center gap-4">
-        <button className="md:hidden p-2 rounded bg-gray-100 dark:bg-gray-700">
+        {/* Attach the onClick handler to the hamburger button */}
+        <button
+          onClick={onMenuClick}
+          className="md:hidden p-2 rounded bg-gray-100 dark:bg-gray-700"
+          aria-label="Toggle Menu"
+        >
           ☰
         </button>
         <div className="text-lg font-semibold">Admin Dashboard</div>

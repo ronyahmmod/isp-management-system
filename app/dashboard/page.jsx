@@ -4,6 +4,7 @@ import { authOptions } from "../api/auth/[...nextauth]/route";
 
 export default async function DashboardRedirect() {
   const session = await getServerSession(authOptions);
+  console.log(session.user);
   if (!session) {
     redirect("/login");
   }
@@ -12,6 +13,6 @@ export default async function DashboardRedirect() {
     case "admin":
       redirect("/dashboard/admin");
     default:
-      redirect("/dashboard/user");
+      redirect("/dashboard/admin");
   }
 }

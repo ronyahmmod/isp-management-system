@@ -12,6 +12,7 @@ export async function PUT(req) {
 
     const { id, ...data } = await req.json();
     const parsed = userUpdateSchema.safeParse(data);
+
     if (!parsed.success) {
       return NextResponse.json(
         { error: "Invalid input", details: parsed.error.errors },
