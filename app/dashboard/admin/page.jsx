@@ -1,10 +1,7 @@
 // app/dashboard/admin/page.jsx
 import StatCard from "@/app/components/stats/StatCard";
-import { getAdminSession } from "@/lib/auth";
 
 export default async function AdminPage() {
-  const session = await getAdminSession();
-
   const stats = {
     users: 54,
     customers: 218,

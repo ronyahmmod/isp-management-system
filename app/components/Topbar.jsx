@@ -15,7 +15,9 @@ export default function Topbar({ user, onMenuClick }) {
         >
           ☰
         </button>
-        <div className="text-lg font-semibold">Admin Dashboard</div>
+        <div className="text-lg font-semibold">
+          {user.role === "admin" ? "Admin Dashboard" : "Employee Panel"}
+        </div>
       </div>
 
       <div className="flex items-center gap-3">
