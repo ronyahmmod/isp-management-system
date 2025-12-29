@@ -1,54 +1,49 @@
-// app/dashboard/customers/page.jsx
 "use client";
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import useCustomers from "@/app/hooks/useCustomers";
+import usePackages from "@/app/hooks/usePackages";
 
-export default function CustomerListPage() {
-  const { customers, error, isLoading, mutate } = useCustomers();
+export default function PackageListPage() {
+  const { packages, error, loading, mutate } = usePackages();
 
-  // --- Client-side pagination and filtering state ---
+  // --- Client Side pagination, pagination and filtering state
+
   const [currentPage, setCurrentPage] = useState(1);
   const [filterTerm, setFilterTerm] = useState("");
-  const CUSTOMERS_PER_PAGE = 10; // Define how many customers to show per page
+  const PACKAGES_PER_PAGE = 5;
 
-  // Calculate filtered and paginated customers using useMemo
-  const filteredCustomers = useMemo(() => {
-    if (!customers) return [];
-
-    return customers.filter(
-      (customer) =>
-        customer.name.toLowerCase().includes(filterTerm.toLowerCase()) ||
-        customer.phone.toLowerCase().includes(filterTerm.toLowerCase()) ||
-        customer.package?.name?.toLowerCase().includes(filterTerm.toLowerCase())
+  // Calculate filtered and paginated packages list
+  const filteredPackages = useMemo(() => {
+    if (!packages) return [];
+    return packages.filter(
+      (p) =>
+        p.name.toLowerCase().includes(filterTerm.toLowerCase()) ||
+        p.status.toLowerCase().includes(filterTerm.toLowerCase())
     );
-  }, [customers, filterTerm]);
+  }, [packages, filterTerm]);
 
-  const totalCustomers = filteredCustomers.length;
-  const totalPages = Math.ceil(totalCustomers / CUSTOMERS_PER_PAGE);
+  const totalPackages = packages.length;
+  const totalPages = Math.ceil(totalPackages / PACKAGES_PER_PAGE);
 
-  const paginatedCustomers = useMemo(() => {
-    const startIndex = (currentPage - 1) * CUSTOMERS_PER_PAGE;
-    return filteredCustomers.slice(startIndex, startIndex + CUSTOMERS_PER_PAGE);
-  }, [filteredCustomers, currentPage]);
+  const paginatedPackages = useMemo(() => {
+    const startIndex = (currentPage - 1) * PACKAGES_PER_PAGE;
+    return filteredPackages.slice(startIndex, startIndex + PACKAGES_PER_PAGE);
+  }, [filteredPackages, currentPage]);
 
-  // Reset page to 1 when filter changes
   const handleFilterChange = (e) => {
     setFilterTerm(e.target.value);
     setCurrentPage(1);
   };
-  // --------------------------------------------------
 
-  if (isLoading)
+  if (loading) {
     return <p className="text-gray-800 dark:text-gray-200">Loading...</p>;
-  if (error)
-    return (
-      <p className="text-red-500">Failed to load customers. {error.message}</p>
-    );
+  }
+
+  if (error) return <p className="text-red-800">Failed to load packages</p>;
 
   async function toggleStatus(id, status) {
-    await fetch("/api/customers/status", {
+    await fetch("/api/packages/status", {
       method: "PUT",
       body: JSON.stringify({ id, status }),
       headers: { "Content-Type": "application/json" },
@@ -56,78 +51,69 @@ export default function CustomerListPage() {
     mutate();
   }
 
-  async function deleteCustomer(id) {
-    if (confirm("Are you sure you want to delete this customer?")) {
-      await fetch("/api/customers/delete", {
-        method: "DELETE",
-        body: JSON.stringify({ id }),
-        headers: { "Content-Type": "application/json" },
-      });
-      mutate();
-    }
-  }
-
+  //   if (totalPackages === 0) {
+  //     return (
+  //       <p className="text-gray-800 dark:text-gray-200">There is no packages.</p>
+  //     );
+  //   }
   return (
     <div>
       <div className="flex justify-between mb-6 items-center">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
-          Customer List
+          Packages List
         </h1>
         <Link
-          href="/dashboard/customers/create"
+          href="/dashboard/packages/create"
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
         >
-          Add Customer
+          Add Package
         </Link>
       </div>
 
-      {/* Filter Input and Total Count */}
+      {/* Filtered input and total count */}
       <div className="flex justify-between items-center mb-4">
         <input
           type="text"
-          placeholder="Filter by name, phone, or package..."
+          name="filterTerm"
           value={filterTerm}
+          placeholder="Filter by name and status"
           onChange={handleFilterChange}
-          // Dark mode styles added here
-          className="w-1/2 p-2 border rounded text-gray-900 bg-white border-gray-300
-                     dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
+          className="w-1/2 p-2 rounded text-gray-900 bg-white border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
         />
         <p className="text-gray-600 dark:text-gray-400">
-          Total Customers Found: {totalCustomers}
+          Total Packages Found: {totalPackages}
         </p>
       </div>
 
       <table className="w-full border dark:border-gray-700">
         <thead>
           <tr className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100">
-            <th className="p-3 text-left">Name</th>
-            <th className="p-3">Phone</th>
-            <th className="p-3">Package</th>
-            <th className="p-3">Next Billing Date</th>
-            <th className="p-3">Status</th>
-            <th className="p-3">Actions</th>
+            <th className="p-2 text-left">Name</th>
+            <th className="p-2">Speed</th>
+            <th className="p-2">Price</th>
+            <th className="p-2">Billing Cycle</th>
+            <th className="p-2">Validity Days</th>
+            <th className="p-2">Status</th>
+            <th className="p-2">Created On</th>
+            <th className="p-2">Actions</th>
           </tr>
         </thead>
 
         <tbody>
-          {/* Render only the paginated customers */}
-          {paginatedCustomers.map((c) => (
-            // Dark mode styles added to table rows
+          {/* Render only the paginated packages */}
+          {paginatedPackages.map((p) => (
             <tr
-              key={c._id}
+              key={p._id}
               className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 text-gray-800 dark:text-gray-200"
             >
-              <td className="p-3">{c.name}</td>
-              <td className="p-3">{c.phone}</td>
-              <td className="p-3">
-                {c.package?.name} - {c.package?.price}
-              </td>
-              <td className="p-3 text-center">
-                {new Date(c.nextBillingDate).toLocaleDateString()}
-              </td>
+              <td className="p-3">{p.name.toUpperCase()}</td>
+              <td className="p-3">{p.speed.toUpperCase()}</td>
+              <td className="p-3">{p.price}</td>
+              <td className="p-3">{p.billingCycle.toUpperCase()}</td>
+              <td className="p-3">{p.validityDays}</td>
               <td className="p-3">
                 {/* Visual status indicators */}
-                {c.status === "active" ? (
+                {p.status === "active" ? (
                   <span className="text-green-600 dark:text-green-400">
                     🟢 Active
                   </span>
@@ -137,42 +123,35 @@ export default function CustomerListPage() {
                   </span>
                 )}
               </td>
+              <td className="p-3">{p.createdAt}</td>
               <td className="p-3 flex gap-2">
                 <Link
-                  href={`/dashboard/customers/edit/${c._id}`}
+                  href={`/dashboard/packages/edit/${p._id}`}
                   className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
                 >
                   Edit
                 </Link>
 
-                {c.status === "active" ? (
+                {p.status === "active" ? (
                   <button
-                    onClick={() => toggleStatus(c._id, "inactive")}
+                    onClick={() => toggleStatus(p._id, "inactive")}
                     className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
                   >
                     Deactivate
                   </button>
                 ) : (
                   <button
-                    onClick={() => toggleStatus(c._id, "active")}
+                    onClick={() => toggleStatus(p._id, "active")}
                     className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
                   >
                     Activate
                   </button>
                 )}
-
-                <button
-                  onClick={() => deleteCustomer(c._id)}
-                  className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                >
-                  Delete
-                </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-
       {/* Pagination Controls */}
       {totalPages > 1 && (
         <div className="flex justify-center mt-6 gap-3 text-gray-800 dark:text-gray-200">

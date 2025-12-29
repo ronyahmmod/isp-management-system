@@ -2,6 +2,8 @@ import mongoose from "mongoose";
 
 const BillingSchema = new mongoose.Schema(
   {
+    invoiceId: { type: String, unique: true },
+
     customer: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Customer",
@@ -25,16 +27,30 @@ const BillingSchema = new mongoose.Schema(
       default: "unpaid",
     },
 
+    paymentMethod: {
+      type: String,
+      enum: ["cash", "bank", "nagad", "bank", "none"],
+      default: "none",
+    },
+
     paidAt: { type: Date },
     collectedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User", // employee or admin
     },
+    transactionId: { type: String }, // For future MFS integration
 
     note: String,
   },
   { timestamps: true }
 );
+
+BillingSchema.pre("save", function (next) {
+  if (!this.invoiceId) {
+    this.invoiceId = `INV-${Date.now()}`;
+  }
+  next();
+});
 
 export default mongoose.models.Billing ||
   mongoose.model("Billing", BillingSchema);

@@ -9,7 +9,8 @@ export default function Sidebar({ user, isOpen, onClose }) {
 
   const navEmployee = [
     { href: "/dashboard/customers", label: "Customers" },
-    { href: "/dashboard/admin/billing", label: "Billing" },
+    { href: "/dashboard/packages", label: "Manage Packages" },
+    { href: "/dashboard/billing", label: "Billing" },
     { href: "/dashboard/admin/settings", label: "Settings" },
   ];
 

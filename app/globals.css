@@ -24,3 +24,29 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@media print {
+  /* Hide Sidebar, Navbar, and any other layout elements */
+  nav,
+  aside,
+  header:not(.payslip-header),
+  footer:not(.payslip-footer),
+  .no-print {
+    display: none !important;
+  }
+
+  /* Force the main content to take up 100% width */
+  main,
+  body {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: white !important;
+  }
+
+  /* Ensure colors and backgrounds are printed (for logos/stamps) */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

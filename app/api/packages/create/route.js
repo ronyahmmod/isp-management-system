@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import Customer from "@/models/Customer";
+import Package from "@/models/Package";
 import { requireEmployee } from "@/lib/requireEmployee";
 
 export async function POST(req) {
@@ -9,11 +9,12 @@ export async function POST(req) {
     await connectDB();
 
     const data = await req.json();
-    const customer = await Customer.create(data);
-
-    return NextResponse.json({ customer }, { status: 201 });
+    const newPackage = await Package.create(data);
+    return NextResponse.json(
+      { package: newPackage, message: "Package created successfully." },
+      { status: 201 }
+    );
   } catch (error) {
-    console.log(error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

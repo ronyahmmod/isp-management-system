@@ -18,7 +18,7 @@ export async function GET(req, ctx) {
         { status: 404 }
       );
 
-    return NextResponse.json({ customer });
+    return NextResponse.json(customer);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

@@ -1,19 +1,16 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import Customer from "@/models/Customer";
+import Package from "@/models/Package";
 import { requireEmployee } from "@/lib/requireEmployee";
 
-export async function POST(req) {
+export async function GET() {
   try {
     await requireEmployee();
     await connectDB();
-
-    const data = await req.json();
-    const customer = await Customer.create(data);
-
-    return NextResponse.json({ customer }, { status: 201 });
+    const packages = await Package.find().sort({ createdAt: -1 });
+    // console.log(packages);
+    return NextResponse.json({ packages }, { status: 200 });
   } catch (error) {
-    console.log(error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

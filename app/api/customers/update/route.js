@@ -8,7 +8,9 @@ export async function PUT(req) {
     await requireEmployee();
     await connectDB();
 
+    // console.log("HIT");
     const { id, ...data } = await req.json();
+    console.log(id, data);
 
     const updated = await Customer.findByIdAndUpdate(id, data, { new: true });
 
