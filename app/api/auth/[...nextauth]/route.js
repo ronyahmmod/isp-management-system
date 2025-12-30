@@ -28,7 +28,7 @@ export const authOptions = {
 
         // --- UPDATED: Add the 'status' to the returned user object ---
         return {
-          id: user._id,
+          id: user._id.toString(),
           name: user.name,
           email: user.email,
           role: user.role,
@@ -47,6 +47,8 @@ export const authOptions = {
       return token;
     },
     async session({ session, token }) {
+      // console.log("token", token);
+      session.user.id = token.sub;
       session.user.role = token.role;
       // --- UPDATED: Pass status from the token to the session object ---
       session.user.status = token.status;

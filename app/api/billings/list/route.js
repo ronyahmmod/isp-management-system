@@ -9,7 +9,6 @@ export async function GET() {
   try {
     requireEmployee();
     await connectDB();
-    console.log("HIT");
     const billings = await Billing.find()
       .populate("customer")
       .populate("package")

@@ -36,7 +36,7 @@ export default async function PayslipHtmlView({ params }) {
   const billingPeriod = `${billing.month} ${billing.year}`;
 
   return (
-    <div className="p-4 md:p-8 bg-gray-50 dark:bg-gray-900 min-h-screen print:p-0 print:bg-white">
+    <div className="p-4 md:p-8 bg-gray-50 dark:bg-gray-900 min-h-screen print:p-10 print:bg-white">
       <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 md:p-10 print:shadow-none print:rounded-none print:max-w-full print:p-0">
         <div className="flex justify-end gap-4 mb-6 print:hidden">
           <PrintButton />
