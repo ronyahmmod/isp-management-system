@@ -11,6 +11,7 @@ export default function Sidebar({ user, isOpen, onClose }) {
     { href: "/dashboard/customers", label: "Customers" },
     { href: "/dashboard/packages", label: "Manage Packages" },
     { href: "/dashboard/billing", label: "Billing" },
+    { href: "/dashboard/reports/finance", label: "Financial Reports" },
     { href: "/dashboard/admin/settings", label: "Settings" },
   ];
 
