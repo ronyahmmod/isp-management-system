@@ -15,6 +15,13 @@ const ExpenseSchema = new mongoose.Schema(
       ],
       required: true,
     },
+    status: { type: String, enum: [], default: "approved" },
+    editRequest: {
+      requestedAmount: Number,
+      requestedTitle: String,
+      reason: String,
+      isEditPending: { type: Boolean, default: false },
+    },
     amount: { type: Number, required: true },
     date: { type: Date, default: Date.now },
     description: String,

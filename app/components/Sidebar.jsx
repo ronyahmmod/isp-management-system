@@ -11,8 +11,10 @@ export default function Sidebar({ user, isOpen, onClose }) {
     { href: "/dashboard/customers", label: "Customers" },
     { href: "/dashboard/packages", label: "Manage Packages" },
     { href: "/dashboard/billing", label: "Billing" },
+    { href: "/dashboard/expenses", label: "Expenses" },
+    { href: "/dashboard/salaries", label: "Salary" },
     { href: "/dashboard/reports/finance", label: "Financial Reports" },
-    { href: "/dashboard/admin/settings", label: "Settings" },
+    { href: "/dashboard/settings", label: "Settings" },
   ];
 
   const navAdmin = [

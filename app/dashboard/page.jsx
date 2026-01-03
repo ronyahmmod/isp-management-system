@@ -8,7 +8,7 @@ export default async function DashboardRedirect() {
   if (!session) {
     redirect("/login");
   }
-  return <div>Welcome to dashboard. Please select a menu from the left.</div>;
+  redirect("/dashboard/admin");
   // const role = session.user.role;
   // switch (role) {
   //   case "admin":

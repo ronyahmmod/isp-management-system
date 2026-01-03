@@ -3,11 +3,12 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useSWR from "swr";
-import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import usePackages from "@/app/hooks/usePackages";
 import { fetcher } from "@/lib/fetcher";
 import { customerCreateSchema } from "@/lib/validation/customerSchema";
+import FormInput from "@/app/components/ui/FormInput";
+import { Loader2, Save } from "lucide-react";
 
 export default function EditCustomerPage() {
   const { id } = useParams();
@@ -61,81 +62,68 @@ export default function EditCustomerPage() {
     return <div className="p-8 dark:text-white">Loading customer data.</div>;
 
   return (
-    <div className="p-8 bg-slate-50 dark:bg-slate-950 min-h-screen">
-      <form
-        onSubmit={handleSubmit(onSubmit, onError)}
-        className="max-w-xl mx-auto space-y-4 bg-white dark:bg-slate-900 p-6 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800"
-      >
-        <h2 className="text-xl font-bold dark:text-white">
+    <div>
+      <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-8">
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
           Edit Customer: {customer?.name}
-        </h2>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex flex-col">
-            <label className="text-sm dark:text-slate-400 ml-1">Name</label>
-            <input
-              {...register("name")}
-              className="p-2 border rounded dark:bg-slate-800 dark:text-white dark:border-slate-700"
-            />
-          </div>
-          <div className="flex flex-col">
-            <label className="text-sm dark:text-slate-400 ml-1">Phone</label>
-            <input
-              {...register("phone")}
-              className="p-2 border rounded dark:bg-slate-800 dark:text-white dark:border-slate-700"
-            />
-          </div>
+        </h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormInput
+            label="Customer Name"
+            name="name"
+            register={register}
+            error={errors.name}
+          />
+          <FormInput
+            label="Phone Number"
+            name="phone"
+            register={register}
+            error={errors.phone}
+          />
         </div>
-        <div>
-          <label className="text-sm dark:text-slate-400 ml-1">Address</label>
-          <input
-            {...register("address")}
-            className="w-full p-2 border rounded dark:bg-slate-800 dark:text-white dark:border-slate-700"
+        <div className="grid grid-cols-1 gap-4">
+          <FormInput
+            label="Address"
+            name="address"
+            register={register}
+            error={errors.address}
           />
         </div>
 
-        <div>
-          <label className="text-sm dark:text-slate-400 ml-1">
-            Internet Package
-          </label>
-          <select
-            {...register("package")}
-            className="w-full p-2 border rounded dark:bg-slate-800 dark:text-white dark:border-slate-700"
-          >
-            <option value="">Select Package</option>
-            {packages?.map((pkg) => (
-              <option key={pkg._id} value={pkg._id}>
-                {pkg.name} - {pkg.price}
-              </option>
-            ))}
-          </select>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormInput
+            label="Select Package"
+            name="package"
+            register={register}
+            error={errors.package}
+            type="select"
+            options={packages?.map((pkg) => ({
+              value: pkg._id, // This is what the form submits (the ID)
+              label: `${pkg.name} - ${pkg.price}`, // This is what the user sees
+            }))}
+          />
+          <FormInput
+            label="Connection Type"
+            name="connectionType"
+            register={register}
+            error={errors.customerType}
+            type="select"
+            options={["PPPoE", "Hotspot", "Static"]}
+          />
         </div>
-
-        <div>
-          <label className="text-sm dark:text-slate-400 ml-1">
-            Connection Type
-          </label>
-          <select
-            {...register("connectionType")}
-            className="w-full p-2 border rounded dark:bg-slate-800 dark:text-white dark:border-slate-700"
-          >
-            <option value="PPPoE">PPPoE</option>
-            <option value="Hotspot">Hotspot</option>
-            <option value="Static">Static</option>
-          </select>
-        </div>
-
         {isPPPoE && (
-          <div className="grid grid-cols-2 gap-4 p-3 bg-slate-100 dark:bg-slate-800 rounded">
-            <input
-              {...register("username")}
-              placeholder="PPPoE User"
-              className="p-2 border rounded dark:bg-slate-700 dark:text-white"
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormInput
+              label="User Name"
+              name="username"
+              register={register}
+              error={errors.username}
             />
-            <input
-              {...register("password")}
-              type="text"
-              placeholder="PPPoE Pass"
-              className="p-2 border rounded dark:bg-slate-700 dark:text-white"
+            <FormInput
+              label="Password"
+              name="password"
+              register={register}
+              error={errors.password}
             />
           </div>
         )}
@@ -144,16 +132,23 @@ export default function EditCustomerPage() {
           <button
             type="button"
             onClick={() => router.back()}
-            className="w-full bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-white font-bold py-2 px-4 rounded-lg"
+            className="w-full bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-white font-bold py-4 px-4 rounded-lg"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg disabled:bg-slate-500"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-4 rounded-lg disabled:bg-slate-500"
           >
-            {isSubmitting ? "Updating..." : "Update Customer"}
+            {isSubmitting ? (
+              <Loader2 className="animate-spin" size={18} />
+            ) : (
+              <span className="flex flex-row items-center justify-center gap-2">
+                <Save size={18} />
+                Update Customer
+              </span>
+            )}
           </button>
         </div>
       </form>

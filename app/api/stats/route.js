@@ -4,15 +4,22 @@ import { requireEmployee } from "@/lib/requireEmployee";
 import Customer from "@/models/Customer";
 import Billing from "@/models/Billing";
 import Expense from "@/models/Expense";
+import User from "@/models/User";
 
 export async function GET() {
   try {
     await requireEmployee();
     await connectDB();
 
-    // 1. User Statistics
-    const totalUsers = await Customer.countDocuments();
-    const activeUsers = await Customer.countDocuments({ status: "active" });
+    // 1. Customer Statistics
+    const totalCustomers = await Customer.countDocuments();
+    const totalActiveCustomers = await Customer.countDocuments({
+      status: "active",
+    });
+
+    // User Statics
+    const totalUsers = await User.countDocuments();
+    const activeUsers = await User.countDocuments({ status: "active" });
 
     // 2. Financial Aggregation
     const billingStats = await Billing.aggregate([
@@ -46,6 +53,11 @@ export async function GET() {
         total: totalUsers,
         active: activeUsers,
         inactive: totalUsers - activeUsers,
+      },
+      customers: {
+        total: totalCustomers,
+        active: totalActiveCustomers,
+        inactive: totalCustomers - totalActiveCustomers,
       },
       finance: {
         totalInvoiced: stats.totalInvoiced,

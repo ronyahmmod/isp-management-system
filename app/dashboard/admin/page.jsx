@@ -8,6 +8,7 @@ import {
   Wallet,
   ArrowUpRight,
   ArrowDownRight,
+  PersonStanding,
 } from "lucide-react";
 
 export default function DashboardOverview() {
@@ -26,10 +27,17 @@ export default function DashboardOverview() {
 
   const cards = [
     {
-      title: "Total Customers",
+      title: "Total Users",
       value: data.users.total,
       sub: `${data.users.active} Active`,
       icon: Users,
+      color: "blue",
+    },
+    {
+      title: "Total Customers",
+      value: data.customers?.total,
+      sub: `${data.customers?.active} Active`,
+      icon: PersonStanding,
       color: "blue",
     },
     {

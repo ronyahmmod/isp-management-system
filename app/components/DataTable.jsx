@@ -20,28 +20,29 @@ export default function DataTable({
 
   // Helper for deep nested values (e.g., "customer.name")
   const getNestedValue = (obj, path) => {
+    if (!path) return ""; // FIX: Handle columns without accessors (Actions)
     return path.split(".").reduce((acc, part) => acc && acc[part], obj);
   };
 
-  // Search Logic across all columns
+  // Search Logic
   const filteredData = useMemo(() => {
     if (!filterTerm) return data;
     return data.filter((item) =>
       columns.some((col) => {
+        if (!col.accessor) return false; // FIX: Skip columns like 'Actions' during search
         const val = getNestedValue(item, col.accessor);
         return String(val).toLowerCase().includes(filterTerm.toLowerCase());
       })
     );
   }, [data, filterTerm, columns]);
 
-  // Pagination Logic
+  // ... (Pagination Logic and getPageNumbers remain the same as your code)
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return filteredData.slice(start, start + itemsPerPage);
   }, [filteredData, currentPage, itemsPerPage]);
 
-  // Page Numbers (Logic to show max 10 buttons)
   const getPageNumbers = () => {
     const pages = [];
     const maxVisible = 10;
@@ -54,6 +55,7 @@ export default function DataTable({
 
   return (
     <div className="w-full">
+      {/* Top Filter Bar */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
         <input
           type="text"
@@ -63,7 +65,7 @@ export default function DataTable({
             setFilterTerm(e.target.value);
             setCurrentPage(1);
           }}
-          className="w-full md:w-1/2 p-2 border rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700"
+          className="w-full md:w-1/2 p-2.5 border rounded-xl bg-white dark:bg-gray-800 dark:border-gray-700 outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
         />
         <div className="flex items-center gap-2 text-sm text-gray-500">
           <span>Show</span>
@@ -73,7 +75,7 @@ export default function DataTable({
               setItemsPerPage(Number(e.target.value));
               setCurrentPage(1);
             }}
-            className="border rounded px-2 py-1 dark:bg-gray-800"
+            className="border rounded-lg px-2 py-1.5 dark:bg-gray-800 dark:border-gray-700 outline-none"
           >
             {[5, 10, 25, 50].map((v) => (
               <option key={v} value={v}>
@@ -85,25 +87,26 @@ export default function DataTable({
         </div>
       </div>
 
-      <div className="overflow-x-auto border rounded-lg dark:border-gray-700">
+      {/* Table Section */}
+      <div className="overflow-x-auto border rounded-2xl dark:border-gray-700 bg-white dark:bg-gray-900">
         <table className="w-full text-sm text-left">
-          <thead className="bg-gray-50 dark:bg-gray-700 uppercase font-bold text-gray-600 dark:text-gray-200">
+          <thead className="bg-gray-50 dark:bg-gray-800/50 uppercase font-bold text-gray-600 dark:text-gray-400 border-b dark:border-gray-700">
             <tr>
               {columns.map((col, i) => (
-                <th key={i} className="p-4">
+                <th key={i} className={`p-4 ${col.className || ""}`}>
                   {col.header}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y dark:divide-gray-700">
+          <tbody className="divide-y dark:divide-gray-800">
             {paginatedData.map((row, i) => (
               <tr
                 key={row._id || i}
-                className="hover:bg-gray-50 dark:hover:bg-gray-800"
+                className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors"
               >
                 {columns.map((col, j) => (
-                  <td key={j} className="p-4">
+                  <td key={j} className={`p-4 ${col.className || ""}`}>
                     {col.cell
                       ? col.cell(row)
                       : getNestedValue(row, col.accessor)}
@@ -115,36 +118,40 @@ export default function DataTable({
         </table>
       </div>
 
-      {/* Pagination Controls */}
-      <div className="mt-4 flex justify-between items-center">
-        <span className="text-xs text-gray-500 uppercase tracking-widest">
-          Page {currentPage} of {totalPages || 1}
+      {/* Pagination Footer */}
+      <div className="mt-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <span className="text-xs font-medium text-gray-500 uppercase tracking-widest">
+          Showing{" "}
+          {Math.min(filteredData.length, (currentPage - 1) * itemsPerPage + 1)}{" "}
+          to {Math.min(filteredData.length, currentPage * itemsPerPage)} of{" "}
+          {filteredData.length}
         </span>
-        <div className="flex gap-1">
+
+        <div className="flex items-center gap-1">
           <button
             onClick={() => setCurrentPage(1)}
             disabled={currentPage === 1}
-            className="p-2 disabled:opacity-20"
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-20 transition-colors"
           >
-            <ChevronsLeft size={16} />
+            <ChevronsLeft size={18} />
           </button>
           <button
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            className="p-2 disabled:opacity-20"
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-20 transition-colors"
           >
-            <ChevronLeft size={16} />
+            <ChevronLeft size={18} />
           </button>
 
-          <div className="hidden sm:flex gap-1">
+          <div className="hidden md:flex gap-1 mx-2">
             {getPageNumbers().map((num) => (
               <button
                 key={num}
                 onClick={() => setCurrentPage(num)}
-                className={`px-3 py-1 rounded ${
+                className={`w-9 h-9 rounded-xl text-sm font-bold transition-all ${
                   currentPage === num
-                    ? "bg-blue-600 text-white"
-                    : "hover:bg-gray-200 dark:hover:bg-gray-700"
+                    ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30"
+                    : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 border border-transparent dark:border-gray-700"
                 }`}
               >
                 {num}
@@ -155,18 +162,21 @@ export default function DataTable({
           <button
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages || totalPages === 0}
-            className="p-2 disabled:opacity-20"
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-20 transition-colors"
           >
-            <ChevronRight size={16} />
+            <ChevronRight size={18} />
           </button>
           <button
             onClick={() => setCurrentPage(totalPages)}
             disabled={currentPage === totalPages || totalPages === 0}
-            className="p-2 disabled:opacity-20"
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-20 transition-colors"
           >
-            <ChevronsRight size={16} />
+            <ChevronsRight size={18} />
           </button>
         </div>
+        <p className="text-xs font-medium text-gray-400 uppercase tracking-widest">
+          Page {currentPage} / {totalPages || 1}
+        </p>
       </div>
     </div>
   );
