@@ -4,130 +4,153 @@ import useSWR from "swr";
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { fetcher } from "@/lib/fetcher";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { userUpdateSchema } from "@/lib/validation/userSchema";
+import FormInput from "@/app/components/ui/FormInput";
+import SubmitButton from "@/app/components/ui/SubmitButton";
+import TableSkeleton from "@/app/components/TableSkeleton";
 
 export default function EditUserPage({ params }) {
   const { id } = useParams();
   const router = useRouter();
+  const [isChangePassword, setIsChangePassword] = useState(false);
 
   const { data, isLoading } = useSWR(`/api/users/${id}`, fetcher);
+  const user = data?.user;
 
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    role: "",
+  const {
+    register,
+    handleSubmit,
+    resetField,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(userUpdateSchema),
+    values: user
+      ? {
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        }
+      : undefined,
   });
 
-  useEffect(() => {
-    if (!data?.user) return;
-
-    setForm((prev) => {
-      const newValues = {
-        name: data.user.name,
-        email: data.user.email,
-        role: data.user.role,
-      };
-      if (
-        prev.name === newValues.name &&
-        prev.email === newValues.email &&
-        prev.role === newValues.role
-      ) {
-        return prev;
-      }
-      return newValues;
-    });
-  }, [data]);
-
-  const togglePasswordField = () => {
-    setForm((prevState) => {
-      const passwordExists = "password" in prevState;
-      if (passwordExists) {
-        const newFormState = { ...prevState };
-        delete newFormState.password;
-        return newFormState;
-      } else {
-        return {
-          ...prevState,
-          password: "",
-        };
-      }
-    });
+  const onError = (errors) => {
+    console.log("Form errors", errors);
   };
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    const res = await fetch(`/api/users/update`, {
-      body: JSON.stringify({
-        id,
-        ...form,
-      }),
-      method: "PUT",
-    });
-    console.log(res);
-    if (!res.ok) {
-      alert("Update failed");
-      return;
+  const togglePasswordField = () => {
+    if (isChangePassword) {
+      // If we are closing the field, remove the password value from form state
+      resetField("password");
     }
-    router.push("/dashboard/admin/users");
+    setIsChangePassword(!isChangePassword);
+  };
+
+  async function onSubmit(values) {
+    try {
+      // Create the payload
+      const payload = {
+        id: user?._id,
+        name: values.name,
+        email: values.email,
+        role: values.role,
+      };
+
+      // Only add password if the field is active and has a value
+      if (isChangePassword && values.password) {
+        payload.password = values.password;
+      }
+
+      const res = await fetch(`/api/users/update`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        // Use the Zod handling we discussed earlier if server returns validation errors
+        if (result.type === "validation") {
+          Object.keys(result.details).forEach((field) => {
+            setError(field, { message: result.details[field][0] });
+          });
+        } else {
+          alert(result.error || "Update failed");
+        }
+        return;
+      }
+
+      router.push("/dashboard/admin/users");
+    } catch (err) {
+      alert("Update failed: " + err.message);
+    }
   }
 
-  const showPasswordField = "password" in form;
-
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) return <TableSkeleton />;
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Edit User</h1>
-
-      <form onSubmit={handleSubmit} className="space-y-4 max-w-lg">
-        <input
-          type="text"
-          placeholder="Name"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-          className="border px-3 py-2 w-full"
-        />
-
-        <input
-          type="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-          className="border px-3 py-2 w-full"
-        />
-
-        <select
-          value={form.role}
-          onChange={(e) => setForm({ ...form, role: e.target.value })}
-          className="border px-3 py-2 w-full"
-        >
-          <option value="employee">Employee</option>
-          <option value="admin">Admin</option>
-        </select>
-
-        {form.password !== undefined && (
-          <input
-            type="password"
-            placeholder="New Password"
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-            className="border px-3 py-2 w-full"
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        onError={onError}
+        className="space-y-8"
+      >
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+          Edit User
+        </h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormInput
+            label="Name"
+            name="name"
+            register={register}
+            error={errors.name}
           />
+          <FormInput
+            label="Email"
+            name="email"
+            type="email"
+            register={register}
+            error={errors.email}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-4">
+          <FormInput
+            label="Role"
+            name="role"
+            type="select"
+            options={[
+              { value: "employee", label: "Employee" },
+              { value: "admin", label: "Admin" },
+            ]}
+            register={register}
+            error={errors.role}
+          />
+        </div>
+
+        {isChangePassword && (
+          <div className="grid grid-cols-1 gap-4">
+            <FormInput
+              label="New Password"
+              name="password"
+              type="password"
+              register={register}
+              error={errors.password}
+            />
+          </div>
         )}
 
         <button
           type="button"
-          className="bg-red-600 text-white px-4 py-2 rounded block"
+          className="bg-red-600 hover:bg-red-700 rounded-lg text-white px-4 py-4 font-bold block"
           onClick={() => togglePasswordField()}
         >
-          {showPasswordField ? "Remove Password" : "Change Password"}
+          {isChangePassword ? "Remove Password" : "Change Password"}
         </button>
 
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded"
-        >
-          Update User
-        </button>
+        <SubmitButton isSubmitting={isSubmitting} label="Update User" />
       </form>
     </div>
   );

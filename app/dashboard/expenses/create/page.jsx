@@ -2,7 +2,7 @@
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Form, Loader2, Save } from "lucide-react";
+import { Loader2, Save } from "lucide-react";
 import FormInput from "@/app/components/ui/FormInput";
 
 export default function ExpenseForm() {
@@ -43,7 +43,7 @@ export default function ExpenseForm() {
       )}
 
       <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
-        New Expense
+        Add New Expense
       </h1>
 
       <div className="grid grid-cols-1 gap-8">

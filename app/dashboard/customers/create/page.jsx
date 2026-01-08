@@ -8,27 +8,6 @@ import { useState } from "react";
 import usePackages from "@/app/hooks/usePackages";
 import FormInput from "@/app/components/ui/FormInput";
 
-const Input = ({ label, id, error, ...props }) => (
-  <div>
-    <label
-      htmlFor={id}
-      className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-    >
-      {label}
-    </label>
-    <input
-      id={id}
-      {...props}
-      className="mt-1 p-2 block w-full rounded-md border dark:shadow-sm focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-700 dark:text-white"
-    />
-    {error && (
-      <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-        {error.message}
-      </p>
-    )}
-  </div>
-);
-
 export default function CreateCustomerForm() {
   const [submitStatus, setSubmitStatus] = useState(null);
   const { packages, loading, error, mutate } = usePackages();

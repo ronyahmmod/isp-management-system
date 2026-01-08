@@ -2,9 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import FormInput from "@/app/components/ui/FormInput";
+import SubmitButton from "@/app/components/ui/SubmitButton";
 
 export default function CreatePackage() {
   const router = useRouter();
+  const [serverError, setServerError] = useState(null);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({});
 
   const [form, setForm] = useState({
     name: "",
@@ -16,70 +25,92 @@ export default function CreatePackage() {
     status: "active",
   });
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    await fetch("/api/packages/create", {
-      method: "POST",
-      body: JSON.stringify(form),
-    })
-      .then((res) => alert(res.message))
-      .catch((error) => alert(error.message));
+  async function onSubmit(data) {
+    try {
+      const response = await fetch("/api/packages/create", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+      if (response.ok) {
+        alert("Package created successfully");
+      }
+    } catch (error) {
+      setServerError(error.message);
+      console.log(error);
+    }
     router.push("/dashboard/packages");
   }
 
-  function handleChange(e) {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  }
-
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Add Package</h1>
-      <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
-        <input
-          type="text"
-          placeholder="Package Name: Ex- Light"
-          value={form.name}
+    <form className="space-y-8" onSubmit={handleSubmit(onSubmit)}>
+      {serverError && (
+        <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-xl text-sm font-medium">
+          {serverError.message}
+        </div>
+      )}
+      <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+        Add New Package
+      </h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <FormInput
           name="name"
-          onChange={handleChange}
-          className="border w-full px-3 py-2"
+          label="Package Name"
+          register={register}
+          error={errors.name}
+          placeholder="e.g. SHAPLA"
+          rules={{ required: "Package name must be required" }}
         />
-        <input
-          type="text"
+        <FormInput
           name="speed"
-          placeholder="Speed: Like 10mbps"
-          value={form.speed}
-          onChange={handleChange}
-          className="border w-full px-3 py-2"
+          label="Speed"
+          register={register}
+          error={errors.speed}
+          placeholder="e.g. 100"
+          rules={{ required: "Speed must be required" }}
         />
-        <input
-          type="number"
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <FormInput
           name="price"
-          placeholder="Price: Like-1000"
-          onChange={handleChange}
-          className="border w-full px-3 py-2"
-          value={form.price}
+          label="Price"
+          type="number"
+          register={register}
+          error={errors.price}
+          placeholder="e.g. 100"
+          rules={{ required: "Price must be required" }}
         />
-        <select
-          name="billingCycle"
-          value={form.billingCycle}
-          onChange={handleChange}
-          className="border w-full px-3 py-2"
-        >
-          <option value="monthly">Monthly</option>
-          <option value="weekly">Weekly</option>
-          <option value="yearly">Yearly</option>
-        </select>
-        <input
-          type="text"
+        <FormInput
           name="validityDays"
-          placeholder="Validity days: Like-30 for monthly, 7 for weekly"
-          onChange={handleChange}
-          className="border w-full px-3 py-2"
+          label="Validity Days"
+          type="number"
+          register={register}
+          error={errors.validityDays}
+          placeholder="e.g. 30"
+          rules={{ required: "Validity Days must be required" }}
         />
-        <button className="bg-blue-600 dark:bg-gray-700 text-white px-4 py-2 rounded hover:bg-blue-600 hover:dark:bg-gray-600 cursor-pointer">
-          Create
-        </button>
-      </form>
-    </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <FormInput
+          name="billingCycle"
+          label="Billing Cycle"
+          type="select"
+          register={register}
+          error={errors.billingCycle}
+          options={[
+            { value: "monthly", label: "Monthly" },
+            { value: "yearly", label: "Yearly" },
+          ]}
+          rules={{ required: "Billing Cycle must be required" }}
+        />
+        <FormInput
+          name="description"
+          label="Description"
+          register={register}
+          error={errors.description}
+          placeholder="e.g. Place a short note"
+        />
+      </div>
+      <SubmitButton isSubmitting={isSubmitting} />
+    </form>
   );
 }

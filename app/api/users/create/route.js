@@ -15,8 +15,8 @@ export async function POST(req) {
     if (!parsed.success) {
       return NextResponse.json(
         {
-          error: "Invalid input",
-          details: parsed.error.errors,
+          type: "validation",
+          details: parsed.error.flatten().fieldErrors,
         },
         { status: 400 }
       );
@@ -26,7 +26,7 @@ export async function POST(req) {
 
     if (exists) {
       return NextResponse.json(
-        { error: "User already exists" },
+        { type: "logic", error: "User already exists" },
         { status: 409 }
       );
     }

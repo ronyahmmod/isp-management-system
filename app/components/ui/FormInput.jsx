@@ -14,6 +14,7 @@ export default function FormInput({
   label,
   name,
   register,
+  rules = {},
   error,
   type = "text",
   options = [],
@@ -32,7 +33,7 @@ export default function FormInput({
         />
         {type === "select" ? (
           <select
-            {...register(name)}
+            {...register(name, rules)}
             className="w-full pl-12 pr-4 py-4 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-600/50 transition-all appearance-none cursor-pointer"
             {...rest}
           >
@@ -57,7 +58,7 @@ export default function FormInput({
         ) : (
           <input
             type={type}
-            {...register(name)}
+            {...register(name, rules)}
             className="w-full pl-12 pr-4 py-4 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-600/50 transition-all"
             {...rest}
           />

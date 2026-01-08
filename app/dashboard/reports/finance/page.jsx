@@ -1,5 +1,6 @@
 import { getFinancialSummary } from "@/lib/finance";
 import PrintButton from "@/app/components/PrintButton";
+import ReportFilterForm from "../components/ReportFilterForm";
 import { Calendar } from "lucide-react";
 
 export default async function FinanceReport({ searchParams }) {
@@ -17,36 +18,7 @@ export default async function FinanceReport({ searchParams }) {
     <div className="p-4 md:p-8 bg-gray-50 dark:bg-gray-900 min-h-screen print:bg-white print:p-0">
       {/* URL Filter - Hidden on Print */}
       <div className="max-w-4xl mx-auto mb-6 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border dark:border-gray-700 print:hidden">
-        <form className="flex flex-wrap items-end gap-4">
-          <div className="flex-1 min-w-[150px]">
-            <label className="text-xs font-bold text-gray-500 uppercase">
-              From
-            </label>
-            <input
-              name="from"
-              type="date"
-              defaultValue={from}
-              className="w-full mt-1 p-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700 text-sm"
-            />
-          </div>
-          <div className="flex-1 min-w-[150px]">
-            <label className="text-xs font-bold text-gray-500 uppercase">
-              To
-            </label>
-            <input
-              name="to"
-              type="date"
-              defaultValue={to}
-              className="w-full mt-1 p-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700 text-sm"
-            />
-          </div>
-          <button
-            type="submit"
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-          >
-            Generate
-          </button>
-        </form>
+        <ReportFilterForm from={from} to={to} />
       </div>
 
       {/* Main Report Card */}

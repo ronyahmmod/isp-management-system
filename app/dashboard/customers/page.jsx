@@ -12,14 +12,14 @@ import {
   Power,
   Trash2,
 } from "lucide-react";
+import TableSkeleton from "@/app/components/TableSkeleton";
 
 export default function CustomerListPage() {
   const { customers, error, isLoading, mutate } = useCustomers();
 
   // --------------------------------------------------
 
-  if (isLoading)
-    return <p className="text-gray-800 dark:text-gray-200">Loading...</p>;
+  if (isLoading) return <TableSkeleton />;
   if (error)
     return (
       <p className="text-red-500">Failed to load customers. {error.message}</p>
@@ -62,7 +62,18 @@ export default function CustomerListPage() {
         </div>
       ),
     },
-    { header: "Billing Cycle", accessor: "nextBillingDate" },
+    {
+      header: "Next Billing Date",
+      accessor: "nextBillingDate",
+      cell: (row) => {
+        const date = new Date(row.nextBillingDate);
+        return date.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
+      },
+    },
     {
       header: "Status",
       accessor: "status",
@@ -121,7 +132,7 @@ export default function CustomerListPage() {
         </h1>
         <Link
           href="/dashboard/customers/create"
-          className="flex flex-row  items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+          className="flex flex-row items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
         >
           <PlusCircle size={18} />
           Add Customer

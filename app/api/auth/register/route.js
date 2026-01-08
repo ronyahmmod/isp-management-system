@@ -9,9 +9,7 @@ export async function POST(req) {
 
     const exists = await User.findOne({ email });
     if (exists)
-      return new Response(JSON.stringify({ error: "Email already used" }), {
-        status: 400,
-      });
+      return Response.json({ message: "Email already used" }, { status: 400 });
     const hashedPassword = await hashPassword(password);
 
     const newUser = await User.create({
@@ -20,10 +18,13 @@ export async function POST(req) {
       password: hashedPassword,
       role,
     });
-    return new Response(JSON.stringify({ message: "User created", newUser }));
+    return Response.json({ message: "User created", newUser }, { status: 201 });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-    });
+    return Response.json(
+      { message: error.message },
+      {
+        status: 500,
+      }
+    );
   }
 }

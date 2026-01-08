@@ -15,7 +15,7 @@ export async function PUT(req) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Invalid input", details: parsed.error.errors },
+        { type: "validation", details: parsed.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
@@ -27,6 +27,6 @@ export async function PUT(req) {
     const user = await User.findByIdAndUpdate(id, data, { new: true });
     return NextResponse.json({ user }, { status: 200 });
   } catch (error) {
-    return NextResponse.json({ error: error.messa });
+    return NextResponse.json({ error: error.message });
   }
 }
