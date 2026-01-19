@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import usePackages from "@/app/hooks/usePackages";
 import FormInput from "@/app/components/ui/FormInput";
-import { generateSingleBill } from "@/lib/bill/billingGenerator";
+import { generateManualSingleBill } from "@/lib/bill/billingGenerator";
 import SubmitButton from "@/app/components/ui/SubmitButton";
 
 export default function CreateCustomerForm() {
@@ -53,7 +53,9 @@ export default function CreateCustomerForm() {
       if (response.ok) {
         const customerData = await response.json();
         console.log(customerData);
-        const billRes = await generateSingleBill(customerData.customer._id);
+        const billRes = await generateManualSingleBill(
+          customerData.customer._id
+        );
         if (billRes.success) {
           console.log(billRes);
           router.push(`/dashboard/billing/pay/${billRes.bill._id}`);
