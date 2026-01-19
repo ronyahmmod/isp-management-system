@@ -17,7 +17,9 @@ async function triggerHandler(req) {
 
   // 2. Fan-out: Send a message for each customer to the worker
   const messages = customers.map((c) => ({
-    url: `${process.env.APP_URL}/api/cron/billing/worker/${c._id}`,
+    url: `${process.env.APP_URL}/api/cron/billing/worker`,
+    method: "POST",
+    headers: { "content-Type": "application/json" },
     body: JSON.stringify({ customerId: c._id }),
     delay: 0,
   }));
