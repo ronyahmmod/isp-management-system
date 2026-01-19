@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const CustomerSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
-    phone: { type: String, required: true },
+    phone: { type: String, required: true, unique: true },
     email: { type: String },
 
     address: { type: String, required: true },
@@ -23,7 +23,19 @@ const CustomerSchema = new mongoose.Schema(
     username: { type: String }, // PPPoE or system username
     password: { type: String }, // PPPoE system password
 
-    status: { type: String, enum: ["active", "inactive"], default: "active" },
+    status: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "inactive",
+    },
+
+    connectionStatus: {
+      type: String,
+      enum: ["connected", "barred"],
+      default: "connected",
+    },
+
+    lastBilledMonth: { type: String },
 
     // Auto billing date
     nextBillingDate: { type: Date, required: true },
@@ -33,6 +45,11 @@ const CustomerSchema = new mongoose.Schema(
 
     // For reports
     joinedAt: { type: Date, default: Date.now },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   { timestamps: true }
 );

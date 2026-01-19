@@ -38,6 +38,16 @@ export const authOptions = {
     }),
   ],
   callbacks: {
+    async signIn({ user }) {
+      // Prevent sign-in if the user's status is "inactive"
+      if (user.status === "inactive") {
+        return {
+          success: false,
+          error: "Your account is inactive. Please contact support.",
+        };
+      }
+      return true; // Allow sign-in
+    },
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role;

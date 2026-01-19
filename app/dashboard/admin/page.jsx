@@ -10,6 +10,7 @@ import {
   ArrowDownRight,
   PersonStanding,
 } from "lucide-react";
+import TableSkeleton from "@/app/components/TableSkeleton";
 
 export default function DashboardOverview() {
   const [data, setData] = useState(null);
@@ -20,10 +21,7 @@ export default function DashboardOverview() {
       .then(setData);
   }, []);
 
-  if (!data)
-    return (
-      <div className="p-10 text-center animate-pulse">Loading Analytics...</div>
-    );
+  if (!data) return <TableSkeleton />;
 
   const cards = [
     {

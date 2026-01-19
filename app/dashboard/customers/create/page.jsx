@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import usePackages from "@/app/hooks/usePackages";
 import FormInput from "@/app/components/ui/FormInput";
+import { generateSingleBill } from "@/lib/bill/billingGenerator";
+import SubmitButton from "@/app/components/ui/SubmitButton";
 
 export default function CreateCustomerForm() {
   const [submitStatus, setSubmitStatus] = useState(null);
@@ -37,7 +39,6 @@ export default function CreateCustomerForm() {
   async function onSubmit(data) {
     // 1. Generate nextBillingDate (e.g., 1 month from now)
     const billingDate = new Date();
-    billingDate.setMonth(billingDate.getMonth() + 1);
 
     // 2. Prepare the final payload for Mongoose
     const finalData = {
@@ -50,15 +51,18 @@ export default function CreateCustomerForm() {
         body: JSON.stringify(finalData),
       });
       if (response.ok) {
-        alert("Customer created successfully");
-        setSubmitStatus("Success");
+        const customerData = await response.json();
+        console.log(customerData);
+        const billRes = await generateSingleBill(customerData.customer._id);
+        if (billRes.success) {
+          console.log(billRes);
+          router.push(`/dashboard/billing/pay/${billRes.bill._id}`);
+        }
       }
     } catch (error) {
       setSubmitStatus(`Error`);
       console.log(error);
     }
-
-    router.push("/dashboard/customers");
   }
   if (loading)
     return <div className="dark:text-white">Loading packages...</div>;
@@ -158,13 +162,7 @@ export default function CreateCustomerForm() {
           />
         </div>
       )}
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="px-4 py-4 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700 disabled:bg-gray-400 dark:bg-blue-700 dark:hover:bg-blue-600"
-      >
-        {isSubmitting ? "Saving..." : "Create Customer"}
-      </button>
+      <SubmitButton isSubmitting={isSubmitting} />
 
       {submitStatus === "success" && (
         <p className="text-green-600 dark:text-green-400">

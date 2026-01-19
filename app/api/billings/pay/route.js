@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { connection, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Billing from "@/models/Billing";
 import Customer from "@/models/Customer";
@@ -43,6 +43,8 @@ export async function POST(req) {
     if (customer) {
       await Customer.findByIdAndUpdate(customer._id, {
         dueAmount: customer.dueAmount - billing.amount,
+        ConnectionStatus: "connected",
+        status: "active",
       });
     }
 
